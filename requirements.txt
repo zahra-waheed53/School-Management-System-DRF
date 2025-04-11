@@ -1,0 +1,7 @@
+# Python 3.10.12 required
+django
+djangorestframework
+pillow
+psycopg2-binary
+python-decouple
+djangorestframework-simplejwt
