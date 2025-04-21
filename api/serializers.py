@@ -30,16 +30,21 @@ class SectionSerializer(serializers.ModelSerializer):
     incharge_teacher = serializers.SerializerMethodField()
     total_students = serializers.SerializerMethodField()
 
-
     class Meta:
         model = Section
         fields = ['id', 'name', 'student_class', 'incharge_teacher', 'total_students']
 
     def get_student_class(self, obj):
-        return obj.student_class.name
+        if hasattr(self, 'student_class'):
+            return self.student_class
+        self.student_class = obj.student_class.name
+        return self.student_class
 
     def get_incharge_teacher(self, obj):
-        return obj.incharge.user.username
+        if hasattr(self, 'incharge_teacher'):
+            return self.incharge_teacher
+        self.incharge_teacher = obj.incharge.user.username
+        return self.incharge_teacher
 
     def get_total_students(self, obj):
         return obj.student_count()
@@ -55,7 +60,7 @@ class SubjectMarksSerializer(serializers.ModelSerializer):
         fields = ['id', 'subject', 'total_marks', 'obtained_marks']
 
 class ResultSerializer(serializers.ModelSerializer):
-    subject_marks = SubjectMarksSerializer(many=True)
+    subject_marks = SubjectMarksSerializer(source='subject_marks_result', many=True)
     class Meta:
         model = Result
         fields = ['id', 'student', 'academic_year', 'academic_term', 'student_class', 'section', 'subject_marks', 'total_marks', 'obtained_marks', 'is_passed', 'rank']
@@ -112,7 +117,13 @@ class TeachingSubjectSerializer(serializers.ModelSerializer):
         fields = ['section', 'subject']
 
     def get_section(self, obj):
-        return obj.section.name
+        if hasattr(self, 'section'):
+            return self.section
+        self.section = obj.section.name
+        return self.section
 
     def get_subject(self, obj):
-        return obj.subject.name
+        if hasattr(self, 'subject'):
+            return self.subject
+        self.subject = obj.subject.name
+        return self.subject

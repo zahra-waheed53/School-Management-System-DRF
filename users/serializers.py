@@ -16,7 +16,10 @@ class StudentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_section(self, obj):
-        return obj.section.name
+        if hasattr(self, 'section'):
+            return self.section
+        self.section = obj.section.name
+        return self.section
 
 class TeacherSerializer(serializers.ModelSerializer):
     user = UserSerializer()

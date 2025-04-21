@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Count
 from users.models import Student, Teacher
 from .utils import ACADEMIC_TERM
 
@@ -21,8 +22,10 @@ class StudentClass(models.Model):
     name = models.CharField(max_length=100)
 
     def student_count(self):
-        return sum(section.student.count() for section in self.student_sections.all())
-    student_count.short_description = 'Total students'
+        if hasattr(self, '_student_count'):
+            return self._student_count
+        self._student_count = self.student_sections.aggregate(total=Count('student'))['total'] or 0
+        return self._student_count
 
     def __str__(self):
         return self.name

@@ -3,13 +3,13 @@ from .models import Student, Teacher, Staff
 from .serializers import *
 
 class StudentViewSet(ModelViewSet):
-    queryset = Student.objects.all()
+    queryset = Student.objects.select_related('user').all()
     serializer_class = StudentSerializer
 
 class TeacherViewSet(ModelViewSet):
-    queryset = Teacher.objects.all()
+    queryset = Teacher.objects.select_related('user').all()
     serializer_class = TeacherSerializer
 
 class StaffViewSet(ModelViewSet):
-    queryset = Staff.objects.all()
+    queryset = Staff.objects.select_related('user').all()
     serializer_class = StaffSerializer

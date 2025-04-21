@@ -8,15 +8,15 @@ class AcademicYearViewSet(viewsets.ModelViewSet):
     serializer_class = AcademicYearSerializer
 
 class AcademicTermViewSet(viewsets.ModelViewSet):
-    queryset = AcademicTerm.objects.all()
+    queryset = AcademicTerm.objects.prefetch_related('academic_year').all()
     serializer_class = AcademicTermSerializer
 
 class ClassViewSet(viewsets.ModelViewSet):
-    queryset = StudentClass.objects.all()
+    queryset = StudentClass.objects.prefetch_related('student_sections').all()
     serializer_class = ClassSerializer
 
 class SectionViewSet(viewsets.ModelViewSet):
-    queryset = Section.objects.all()
+    queryset = Section.objects.prefetch_related('student').all()
     serializer_class = SectionSerializer
 
 class SubjectViewSet(viewsets.ModelViewSet):
@@ -30,3 +30,5 @@ class ResultViewSet(viewsets.ModelViewSet):
 class TeacherSubjectViewSet(viewsets.ModelViewSet):
     queryset = TeacherSubject.objects.all()
     serializer_class = TeachingSubjectSerializer
+    # def get_queryset(self):
+    #     queryset = TeacherSubject.objects.prefetch_related('')
