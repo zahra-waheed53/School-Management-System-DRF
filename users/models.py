@@ -7,6 +7,7 @@ class User(AbstractUser):
     address = models.CharField(max_length=1000)
     phone = models.CharField(max_length=20)
     image = models.ImageField(upload_to="images/")
+    is_suspended = models.BooleanField(default=False)
     def __str__(self):
         return self.username
 
