@@ -1,7 +1,7 @@
 from rest_framework import viewsets
+from django.db.models import Count
+from api.serializers import *
 
-from .models import *
-from .serializers import *
 
 class AcademicYearViewSet(viewsets.ModelViewSet):
     queryset = AcademicYear.objects.all()
@@ -12,12 +12,8 @@ class AcademicTermViewSet(viewsets.ModelViewSet):
     serializer_class = AcademicTermSerializer
 
 class ClassViewSet(viewsets.ModelViewSet):
-    queryset = StudentClass.objects.prefetch_related('student_sections').all()
+    queryset = Classes.objects.all()
     serializer_class = ClassSerializer
-
-class SectionViewSet(viewsets.ModelViewSet):
-    queryset = Section.objects.prefetch_related('student').all()
-    serializer_class = SectionSerializer
 
 class SubjectViewSet(viewsets.ModelViewSet):
     queryset = Subject.objects.all()

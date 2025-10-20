@@ -1,24 +1,19 @@
 from django.contrib import admin
 from .models import *
-from api.models import TeacherSubject, Section
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'username', 'email', 'date_of_birth', 'address', 'phone']
-
-@admin.register(Student)
-class StudentClassAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'attendance', 'section']
+from api.models import TeacherSubject
 
 class TeacherSubjectInline(admin.TabularInline):
     model = TeacherSubject
     extra = 1
 
-@admin.register(Teacher)
-class TeacherAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'attendance']
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ['id', 'username', 'email', 'role', 'date_of_birth', 'address', 'phone', 'classes']
+    list_filter = ['role']
     inlines = [TeacherSubjectInline]
-
-@admin.register(Staff)
-class StaffAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'designation']
+    
+    def get_inlines(self, request, obj):
+        # Only show TeacherSubjectInline for teachers
+        if obj and obj.role == 'teacher':
+            return [TeacherSubjectInline]
+        return []

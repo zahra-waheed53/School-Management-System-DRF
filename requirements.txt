@@ -6,3 +6,10 @@ psycopg2-binary
 python-decouple
 djangorestframework-simplejwt
 django-debug-toolbar
+opencv-python
+opencv_contrib-python
+face_recognition
+numpy
+celery
+redis
+django-celery-beat

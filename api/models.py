@@ -1,11 +1,15 @@
 from django.db import models
-from django.db.models import Count
-from users.models import Student, Teacher
-from .utils import ACADEMIC_TERM
+from django.conf import settings
+from api.enums import ACADEMIC_TERM
 
 class AcademicYear(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     current = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        if self.current:
+            AcademicYear.objects.exclude(pk=self.pk).update(current=False)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -15,28 +19,22 @@ class AcademicTerm(models.Model):
     academic_year = models.ForeignKey('AcademicYear', on_delete=models.CASCADE, related_name='academic_term', default=1)
     current = models.BooleanField(default=True)
 
-    def __str__(self):
-        return self.name
-
-class StudentClass(models.Model):
-    name = models.CharField(max_length=100)
-
-    def student_count(self):
-        if hasattr(self, '_student_count'):
-            return self._student_count
-        self._student_count = self.student_sections.aggregate(total=Count('student'))['total'] or 0
-        return self._student_count
+    def save(self, *args, **kwargs):
+        if self.current:
+            AcademicTerm.objects.exclude(pk=self.pk).update(current=False)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
-class Section(models.Model):
+class Classes(models.Model):
     name = models.CharField(max_length=100)
-    student_class = models.ForeignKey(StudentClass, on_delete=models.CASCADE, related_name='student_sections')
-    incharge = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='teacher_sections')
+    section = models.CharField(max_length=100)
+    incharge = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='incharge_classes', limit_choices_to={'role': 'teacher'})
 
     def student_count(self):
-        return self.student.count()
+        return self.students.count()
+
     student_count.short_description = 'Total students'
 
     def __str__(self):
@@ -58,11 +56,10 @@ class SubjectMarks(models.Model):
         return self.subject.name+'--'+str(self.total_marks)+'--'+str(self.obtained_marks)
 
 class Result(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={'role': 'student'})
     academic_year = models.ForeignKey(AcademicYear, on_delete=models.CASCADE, related_name='academic_year_results')
     academic_term = models.ForeignKey(AcademicTerm, on_delete=models.CASCADE, related_name='academic_term_results')
-    student_class = models.ForeignKey(StudentClass, on_delete=models.CASCADE, related_name='student_results')
-    section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='section_results')
+    classes = models.ForeignKey(Classes, on_delete=models.CASCADE, related_name='class_results')
     subject = models.ManyToManyField(Subject,through='SubjectMarks', related_name='subject_results')
     total_marks = models.DecimalField(max_digits=10, decimal_places=1, null=True, blank=True)
     obtained_marks = models.DecimalField(max_digits=10, decimal_places=1, null=True, blank=True)
@@ -71,8 +68,7 @@ class Result(models.Model):
 
     def save(self, *args, **kwargs):
         if self.student:
-            self.section = self.student.section
-            self.student_class = self.student.section.student_class
+            self.classes = self.student.classes
         self.academic_year = AcademicYear.objects.filter(current=True).first()
         self.academic_term = AcademicTerm.objects.filter(current=True).first()
 
@@ -80,10 +76,10 @@ class Result(models.Model):
 
 
     def __str__(self):
-        return self.student.user.username
+        return self.student.username
 
 
 class TeacherSubject(models.Model):
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='teacher_subject', limit_choices_to={'role': 'teacher'})
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    section = models.ForeignKey(Section, on_delete=models.CASCADE)
+    classes = models.ForeignKey(Classes, on_delete=models.CASCADE)

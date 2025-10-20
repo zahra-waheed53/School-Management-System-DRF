@@ -8,29 +8,10 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20)
     image = models.ImageField(upload_to="images/")
     is_suspended = models.BooleanField(default=False)
+    role = models.CharField(choices=[('admin', 'Admin'), ('student', 'Student'), ('teacher', 'Teacher'), ('staff', 'Staff')], max_length=20)
+    classes = models.ForeignKey('api.Classes', on_delete=models.CASCADE, related_name="students", null=True, blank=True)
+    designation = models.CharField(max_length=100, default="", blank=True)
+    teacher_classes = models.ManyToManyField('api.Classes', through='api.TeacherSubject', related_name="class_teachers", blank=True)
+
     def __str__(self):
         return self.username
-
-
-class Student(models.Model):
-    section = models.ForeignKey('api.Section', on_delete=models.CASCADE, related_name="student")
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    attendance = models.IntegerField(default=0)
-    def __str__(self):
-        return self.user.username
-
-
-class Staff(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    designation = models.CharField(max_length=100)
-    attendance = models.IntegerField(default=0)
-    def __str__(self):
-        return self.user.username
-
-class Teacher(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher")
-    attendance = models.IntegerField(default=0)
-    designation = models.CharField(max_length=100, default="teacher")
-    section = models.ManyToManyField('api.Section',through='api.TeacherSubject', related_name="section_teachers", blank=True)
-    def __str__(self):
-        return self.user.username

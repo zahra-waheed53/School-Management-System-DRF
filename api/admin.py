@@ -9,13 +9,9 @@ class AcademicYearAdmin(admin.ModelAdmin):
 class AcademicTermAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'current']
 
-@admin.register(StudentClass)
-class StudentClassAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'student_count']
-
-@admin.register(Section)
-class SectionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'student_class', 'incharge', 'student_count']
+@admin.register(Classes)
+class ClassAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'section', 'incharge', 'student_count']
 
 @admin.register(Subject)
 class SubjectAdmin(admin.ModelAdmin):
@@ -28,14 +24,13 @@ class SubjectMarkInline(admin.TabularInline):
 @admin.register(Result)
 class ResultAdmin(admin.ModelAdmin):
     inlines = [SubjectMarkInline]
-    list_display = ['student', 'academic_year', 'academic_term', 'section']
-    readonly_fields = ['academic_year', 'academic_term', 'section', 'student_class', 'total_marks', 'obtained_marks']
+    list_display = ['student', 'academic_year', 'academic_term', 'classes']
+    readonly_fields = ['academic_year', 'academic_term', 'classes', 'total_marks', 'obtained_marks']
 
     def save_model(self, request, obj, form, change):
         # Auto-fill fields before saving
         if obj.student:
-            obj.section = obj.student.section
-            obj.student_class = obj.student.section.student_class
+            obj.classes = obj.student.classes
         obj.academic_year = AcademicYear.objects.filter(current=True).first()
         obj.academic_term = AcademicTerm.objects.filter(current=True).first()
         obj.save()
@@ -44,10 +39,11 @@ class ResultAdmin(admin.ModelAdmin):
         super().save_related(request, form, formsets, change)
         obj = form.instance
         subject_marks = obj.subject_marks_result.all()
-        obj.total_marks = sum(m.total_marks for m in subject_marks)
-        obj.obtained_marks = sum(m.obtained_marks for m in subject_marks)
-        obj.save()
+        if subject_marks:
+            obj.total_marks = sum(m.total_marks for m in subject_marks)
+            obj.obtained_marks = sum(m.obtained_marks for m in subject_marks)
+            obj.save()
 
 @admin.register(TeacherSubject)
 class TeacherSubjectAdmin(admin.ModelAdmin):
-    list_display = ['teacher', 'subject', 'section']
+    list_display = ['teacher', 'subject', 'classes']

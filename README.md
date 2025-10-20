@@ -33,11 +33,21 @@ It's built using Django Rest Framework.
 
       Add, Retrieve, Update, Delete and List Staff with thei ROLES
 
-- Attendance
+- Attendance (with Facial Recognition)
 
-      Add, Retrieve, Update, Delete and List Teacher Attendance
-      Add, Retrieve, Update, Delete and List Student Attendance
-      Add, Retrieve, Update, Delete and List Staff Attendance
+      ✨ Face-based attendance marking using facial recognition
+      ✨ Automatic status determination (Present/Late) based on dynamic school timings
+      ✨ Dynamic school timing configuration (Admin-only)
+      ✨ Automatic marking of absentees at dismissal time using Celery
+      - Face registration and verification
+      - Daily attendance tracking with facial recognition
+      - Monthly attendance reports and statistics
+      - Configurable school timings (arrival, late threshold, dismissal)
+      - Only ONE active timing at a time (enforced)
+      - Automated absent marking via scheduled tasks
+      
+      📖 See SCHOOL_TIMING_API.md for school timing management
+      📖 See ATTENDANCE_SETUP.md for detailed setup and usage instructions
       
 
 - Results
