@@ -13,3 +13,5 @@ numpy
 celery
 redis
 django-celery-beat
+boto3
+django-storages
